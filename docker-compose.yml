@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: finsight-postgres
+    environment:
+      POSTGRES_DB: finsight
+      POSTGRES_USER: finsight_user
+      POSTGRES_PASSWORD: finsight_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finsight_user -d finsight"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - finsight-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finsight-frontend
+    environment:
+      - DATABASE_URL=postgresql://finsight_user:finsight_password@postgres:5432/finsight
+    ports:
+      - "7860:7860"
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - finsight-network
+    command: python main.py
+
+volumes:
+  postgres_data:
+
+networks:
+  finsight-network:
+    driver: bridge
