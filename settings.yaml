@@ -1,0 +1,8 @@
+# Application Configuration
+# Environment variables will override these settings
+
+# Backend Service
+BACKEND_URL: "http://localhost:8081/chat"
+
+# Database Configuration
+DATABASE_URL: "postgresql://user:password@localhost:5432/finsight"
